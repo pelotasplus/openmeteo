@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
+import pl.pelotasplus.openmeteo.data.model.WeatherType
 import pl.pelotasplus.openmeteo.feature.details.DetailsScreen
 import pl.pelotasplus.openmeteo.feature.home.HomeScreen
 import pl.pelotasplus.openmeteo.feature.splash.SplashScreen
@@ -20,7 +21,13 @@ sealed interface AppNavigationDestinations {
     data object Home : AppNavigationDestinations
 
     @Serializable
-    data object Details : AppNavigationDestinations
+    data class Details(
+        val location: String,
+        val temperature: Double,
+        val weatherType: WeatherType,
+        val humidity: Double,
+        val windSpeed: Double,
+    ) : AppNavigationDestinations
 }
 
 @Composable
@@ -46,12 +53,20 @@ fun AppNavigation(
         composable<AppNavigationDestinations.Home> {
             HomeScreen(
                 goToDetails = {
-                    navController.navigate(AppNavigationDestinations.Details)
+                    navController.navigate(
+                        AppNavigationDestinations.Details(
+                            location = it.name,
+                            temperature = it.currentWeather.temperature.toDouble(),
+                            weatherType = it.currentWeather.type,
+                            humidity = it.currentWeather.humidity,
+                            windSpeed = it.currentWeather.windSpeed
+                        )
+                    )
                 }
             )
         }
 
-        composable<AppNavigationDestinations.Details> {
+        composable<AppNavigationDestinations.Details> { backStackEntry ->
             DetailsScreen()
         }
     }

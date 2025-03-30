@@ -20,4 +20,6 @@
     <string name="temperature_min">Min: %1$s °C</string>
     <string name="temperature_max">Max: %1$s °C</string>
     <string name="temperature_current">%1$s °C</string>
+    <string name="wind_speed">Wind Speed: %1$s km/h</string>
+    <string name="humidity">Humidity: %1$s%%</string>
 </resources>

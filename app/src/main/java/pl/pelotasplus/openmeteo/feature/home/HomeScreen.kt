@@ -19,7 +19,7 @@ import pl.pelotasplus.openmeteo.ui.theme.OpenMeteoTheme
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    goToDetails: () -> Unit
+    goToDetails: (SearchResult) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -31,8 +31,8 @@ fun HomeScreen(
                 Toast.makeText(context, effect.error.message, Toast.LENGTH_SHORT).show()
             }
 
-            HomeViewModel.Effect.ShowDetails -> {
-                goToDetails()
+            is HomeViewModel.Effect.ShowDetails -> {
+                goToDetails(effect.searchResult)
             }
         }
     }
@@ -45,6 +45,9 @@ fun HomeScreen(
         },
         onSearchResultClicked = {
             viewModel.handleEvent(HomeViewModel.Event.SearchResultClicked(it))
+        },
+        onCurrentWeatherClicked = {
+            viewModel.handleEvent(HomeViewModel.Event.CurrentWeatherClicked)
         }
     )
 }
@@ -54,7 +57,8 @@ private fun HomeContent(
     state: HomeViewModel.State,
     modifier: Modifier = Modifier,
     onSearchTermChanged: (String) -> Unit = {},
-    onSearchResultClicked: (SearchResult) -> Unit = {}
+    onSearchResultClicked: (SearchResult) -> Unit = {},
+    onCurrentWeatherClicked: () -> Unit = {}
 ) {
     if (state.loading) {
         HomeLoadingContent(modifier)
@@ -63,7 +67,8 @@ private fun HomeContent(
             state,
             modifier,
             onSearchTermChanged,
-            onSearchResultClicked
+            onSearchResultClicked,
+            onCurrentWeatherClicked
         )
     }
 }

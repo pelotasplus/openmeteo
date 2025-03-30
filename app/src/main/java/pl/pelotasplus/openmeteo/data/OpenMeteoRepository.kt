@@ -55,6 +55,8 @@ class OpenMeteoRepository @Inject constructor(
         return flow {
             val ret = fetchForecastForLocation(lat, lon)
 
+            print("XXX ret ${ret.current.humidity} -> ${ret.current.windSpeed}")
+
             val mappedForecasts = (0 until ret.daily.time.size).map {
                 val time = ret.daily.time[it]
                 val weatherCode = ret.daily.weatherCode[it]
@@ -92,6 +94,8 @@ class OpenMeteoRepository @Inject constructor(
                 "wind_speed_10m",
                 "relative_humidity_2m"
             )
-        )
+        ).also {
+            print("XXX ret ${it.current.humidity} -> ${it.current.windSpeed}")
+        }
     }
 }

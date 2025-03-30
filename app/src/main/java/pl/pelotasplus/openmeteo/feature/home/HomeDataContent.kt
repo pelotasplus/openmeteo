@@ -1,6 +1,7 @@
 package pl.pelotasplus.openmeteo.feature.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,6 +38,7 @@ internal fun HomeDataContent(
     modifier: Modifier = Modifier,
     onSearchTermChanged: (String) -> Unit = {},
     onSearchResultClicked: (SearchResult) -> Unit = {},
+    onCurrentWeatherClicked: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -52,7 +54,10 @@ internal fun HomeDataContent(
         Card(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(16.dp),
+                .padding(16.dp)
+                .clickable {
+                    onCurrentWeatherClicked()
+                },
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,

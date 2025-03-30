@@ -25,6 +25,7 @@ import pl.pelotasplus.openmeteo.data.OpenMeteoRepository
 import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
 import pl.pelotasplus.openmeteo.domain.model.SearchResult
 import pl.pelotasplus.openmeteo.domain.model.SingleDayForecast
+import pl.pelotasplus.openmeteo.feature.home.HomeViewModel.Effect.*
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -49,7 +50,7 @@ class HomeViewModel @Inject constructor(
         when (event) {
             is Event.SearchResultClicked -> {
                 viewModelScope.launch {
-                    _effect.send(Effect.ShowDetails)
+                    _effect.send(ShowDetails(event.searchResult))
                 }
             }
 
@@ -60,6 +61,24 @@ class HomeViewModel @Inject constructor(
             is Event.SearchTermChanged -> {
                 _state.update {
                     it.copy(searchTerm = event.term)
+                }
+            }
+
+            Event.CurrentWeatherClicked -> {
+                state.value.currentWeather?.let {
+                    viewModelScope.launch {
+                        _effect.send(
+                            ShowDetails(
+                                SearchResult(
+                                    name = state.value.location,
+                                    country = "",
+                                    latitude = 0.0,
+                                    longitude = 0.0,
+                                    currentWeather = it
+                                )
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -105,6 +124,7 @@ class HomeViewModel @Inject constructor(
                         location.longitude
                     )
                 ) { weather, address ->
+                    println("XXX got weather $weather")
                     _state.update {
                         it.copy(
                             location = address?.let {
@@ -129,7 +149,7 @@ class HomeViewModel @Inject constructor(
 
     private fun handleError(error: Throwable) {
         viewModelScope.launch {
-            _effect.send(Effect.Error(error))
+            _effect.send(Error(error))
         }
     }
 
@@ -144,12 +164,13 @@ class HomeViewModel @Inject constructor(
 
     sealed interface Event {
         data object LoadWeather : Event
+        data object CurrentWeatherClicked : Event
         data class SearchResultClicked(val searchResult: SearchResult) : Event
         data class SearchTermChanged(val term: String) : Event
     }
 
     sealed interface Effect {
         data class Error(val error: Throwable) : Effect
-        data object ShowDetails : Effect
+        data class ShowDetails(val searchResult: SearchResult) : Effect
     }
 }

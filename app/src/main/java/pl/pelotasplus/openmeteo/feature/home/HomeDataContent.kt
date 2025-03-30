@@ -1,5 +1,6 @@
 package pl.pelotasplus.openmeteo.feature.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,19 +10,20 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import pl.pelotasplus.openmeteo.R
 import pl.pelotasplus.openmeteo.data.model.WeatherType
 import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
 import pl.pelotasplus.openmeteo.domain.model.SearchResult
@@ -61,20 +63,27 @@ internal fun HomeDataContent(
                     style = MaterialTheme.typography.titleLarge
                 )
 
-                Text(
-                    text = state.currentWeather?.temperature.orEmpty(),
-                    style = MaterialTheme.typography.titleLarge
-                )
+                state.currentWeather?.let { currentWeather ->
+                    Text(
+                        text = stringResource(R.string.temperature_current, state.currentWeather.temperature),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
 
-                Text(
-                    text = state.currentWeather?.let { stringResource(it.type.stringRes) } ?: "",
-                    style = MaterialTheme.typography.titleLarge
-                )
+                    Text(
+                        text = stringResource(currentWeather.type.stringRes),
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 2,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                Icon(
-                    imageVector = Icons.Filled.Home,
-                    contentDescription = null,
-                )
+                    Image(
+                        painter = painterResource(state.currentWeather.type.iconRes),
+                        contentDescription = null,
+                        modifier = Modifier.scale(2f)
+                    )
+                }
             }
         }
 

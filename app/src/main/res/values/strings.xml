@@ -16,5 +16,8 @@
     <string name="weather_thunderstorm_hail_slight_heavy">Thunderstorm with slight and heavy hail</string>
     <string name="splash_location_permission_message">Please grant us access to your precise location so we can show you relevant weather forecasts.</string>
     <string name="splash_location_permission_cta">Request permission</string>
-    <string name="home_search_clear_content_description">Clear searchterm</string>
+    <string name="home_search_clear_content_description">Clear search term</string>
+    <string name="temperature_min">Min: %1$s °C</string>
+    <string name="temperature_max">Max: %1$s °C</string>
+    <string name="temperature_current">%1$s °C</string>
 </resources>

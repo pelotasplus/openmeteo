@@ -1,24 +1,25 @@
 package pl.pelotasplus.openmeteo.feature.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import pl.pelotasplus.openmeteo.R
 import pl.pelotasplus.openmeteo.data.model.WeatherType
 import pl.pelotasplus.openmeteo.domain.model.SingleDayForecast
 import pl.pelotasplus.openmeteo.ui.theme.OpenMeteoTheme
@@ -38,12 +39,15 @@ fun HomeForecastCard(
         ) {
             Text(
                 text = item.date,
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleSmall,
             )
 
-            Icon(
-                imageVector = Icons.Filled.Home,
+            Image(
+                painter = painterResource(item.type.iconRes),
                 contentDescription = null,
+                modifier = Modifier
+                    .scale(2f)
+                    .padding(vertical = 8.dp)
             )
 
             Text(
@@ -57,14 +61,14 @@ fun HomeForecastCard(
 
             Row {
                 Text(
-                    text = "Min: ${item.temperatureMin}",
+                    text = stringResource(R.string.temperature_min, item.temperatureMin),
                     style = MaterialTheme.typography.bodySmall
                 )
 
                 Spacer(Modifier.weight(1f))
 
                 Text(
-                    text = "Max: ${item.temperatureMax}",
+                    text = stringResource(R.string.temperature_max, item.temperatureMax),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

@@ -9,6 +9,7 @@ import android.os.Build
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.asDeferred
@@ -52,6 +53,7 @@ class LocationRepository @Inject constructor(@ApplicationContext context: Contex
                 }
             }
         } catch (e: Exception) {
+            ensureActive()
             null
         }
     }

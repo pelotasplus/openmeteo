@@ -7,8 +7,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import pl.pelotasplus.openmeteo.data.model.WeatherType
+import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
 import pl.pelotasplus.openmeteo.domain.model.SearchResult
 import pl.pelotasplus.openmeteo.ui.theme.OpenMeteoTheme
 
@@ -22,6 +25,8 @@ fun HomeSearchResultContent(
             text = searchResult.name + ", " + searchResult.country,
             style = MaterialTheme.typography.titleLarge
         )
+        Text("Min: ${searchResult.currentWeather.temperature}, max: ${searchResult.currentWeather.temperature}")
+        Text(stringResource(searchResult.currentWeather.type.stringRes))
     }
 }
 
@@ -34,7 +39,14 @@ private fun HomeSearchResultContentPreview() {
                 name = "London",
                 country = "UK",
                 latitude = 1.0,
-                longitude = 2.0
+                longitude = 2.0,
+                currentWeather = CurrentWeather(
+                    date = "2023-03-29",
+                    type = WeatherType.ClearSky,
+                    temperature = "10.0",
+                    windSpeed = 20.0,
+                    humidity = 30.0
+                )
             )
         )
     }

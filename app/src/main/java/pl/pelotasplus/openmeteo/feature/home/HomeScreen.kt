@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import pl.pelotasplus.openmeteo.core.ObserveEffects
 
 @Composable
 fun HomeScreen(
@@ -15,10 +16,19 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
     goToDetails: () -> Unit
 ) {
+    ObserveEffects(viewModel.effect) { effect ->
+        when (effect) {
+            HomeViewModel.Effect.Error -> TODO()
+            HomeViewModel.Effect.ShowDetails -> {
+                goToDetails()
+            }
+        }
+    }
+
     HomeContent(
         modifier = modifier,
         onGoToDetailsClick = {
-            goToDetails()
+            viewModel.handleEvent(HomeViewModel.Event.GoToDetailsClicked)
         }
     )
 }

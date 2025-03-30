@@ -10,7 +10,8 @@ interface OpenMeteoApi {
     suspend fun forecast(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("daily") daily: List<String>
+        @Query("daily") daily: List<String>,
+        @Query("current") current: List<String>
     ): ForecastResponse
 
 }

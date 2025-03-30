@@ -1,14 +1,18 @@
 package pl.pelotasplus.openmeteo.feature.home
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.pelotasplus.openmeteo.core.ObserveEffects
+import pl.pelotasplus.openmeteo.data.model.WeatherType
+import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
+import pl.pelotasplus.openmeteo.domain.model.SingleDayForecast
+import pl.pelotasplus.openmeteo.ui.theme.OpenMeteoTheme
 
 @Composable
 fun HomeScreen(
@@ -16,10 +20,16 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     goToDetails: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveEffects(viewModel.effect) { effect ->
         when (effect) {
-            HomeViewModel.Effect.Error -> TODO()
+            is HomeViewModel.Effect.Error -> {
+                Toast.makeText(context, effect.error.message, Toast.LENGTH_SHORT).show()
+            }
+
             HomeViewModel.Effect.ShowDetails -> {
                 goToDetails()
             }
@@ -28,6 +38,7 @@ fun HomeScreen(
 
     HomeContent(
         modifier = modifier,
+        state = state,
         onGoToDetailsClick = {
             viewModel.handleEvent(HomeViewModel.Event.GoToDetailsClicked)
         }
@@ -36,25 +47,45 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
+    state: HomeViewModel.State,
     modifier: Modifier = Modifier,
-    onGoToDetailsClick: () -> Unit = {}
+    onGoToDetailsClick: () -> Unit = {},
 ) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text("Home Content")
-
-        Button(
-            onClick = onGoToDetailsClick,
-            content = {
-                Text("Go to details")
-            }
+    if (state.loading) {
+        HomeLoadingContent(modifier)
+    } else {
+        HomeDataContent(
+            state,
+            modifier,
+            onGoToDetailsClick
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun HomeContentPreview() {
-    HomeContent()
+private fun HomeContentHasDataPreview() {
+    OpenMeteoTheme {
+        HomeContent(
+            state = HomeViewModel.State(
+                loading = false,
+                location = "London, UK",
+                currentWeather = CurrentWeather(
+                    date = "2023-03-29",
+                    type = WeatherType.ClearSky,
+                    temperature = "10.0",
+                    windSpeed = 20.0,
+                    humidity = 30.0
+                ),
+                forecast = listOf(
+                    SingleDayForecast(
+                        date = "2023-03-29",
+                        type = WeatherType.ClearSky,
+                        temperatureMax = 10.0,
+                        temperatureMin = 5.0
+                    )
+                )
+            )
+        )
+    }
 }

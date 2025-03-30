@@ -11,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.pelotasplus.openmeteo.core.ObserveEffects
 import pl.pelotasplus.openmeteo.data.model.WeatherType
 import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
+import pl.pelotasplus.openmeteo.domain.model.SearchResult
 import pl.pelotasplus.openmeteo.domain.model.SingleDayForecast
 import pl.pelotasplus.openmeteo.ui.theme.OpenMeteoTheme
 
@@ -39,8 +40,11 @@ fun HomeScreen(
     HomeContent(
         modifier = modifier,
         state = state,
-        onGoToDetailsClick = {
-            viewModel.handleEvent(HomeViewModel.Event.GoToDetailsClicked)
+        onSearchTermChanged = { term ->
+            viewModel.handleEvent(HomeViewModel.Event.SearchTermChanged(term))
+        },
+        onSearchResultClicked = {
+            viewModel.handleEvent(HomeViewModel.Event.SearchResultClicked(it))
         }
     )
 }
@@ -49,7 +53,8 @@ fun HomeScreen(
 private fun HomeContent(
     state: HomeViewModel.State,
     modifier: Modifier = Modifier,
-    onGoToDetailsClick: () -> Unit = {},
+    onSearchTermChanged: (String) -> Unit = {},
+    onSearchResultClicked: (SearchResult) -> Unit = {}
 ) {
     if (state.loading) {
         HomeLoadingContent(modifier)
@@ -57,7 +62,8 @@ private fun HomeContent(
         HomeDataContent(
             state,
             modifier,
-            onGoToDetailsClick
+            onSearchTermChanged,
+            onSearchResultClicked
         )
     }
 }

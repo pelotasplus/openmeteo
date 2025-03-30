@@ -8,9 +8,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
@@ -18,8 +23,10 @@ import kotlinx.coroutines.launch
 import pl.pelotasplus.openmeteo.data.LocationRepository
 import pl.pelotasplus.openmeteo.data.OpenMeteoRepository
 import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
+import pl.pelotasplus.openmeteo.domain.model.SearchResult
 import pl.pelotasplus.openmeteo.domain.model.SingleDayForecast
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -35,52 +42,89 @@ class HomeViewModel @Inject constructor(
 
     init {
         handleEvent(Event.LoadWeather)
+        observeSearchTerm()
     }
 
     fun handleEvent(event: Event) {
         when (event) {
-            Event.GoToDetailsClicked -> {
+            is Event.SearchResultClicked -> {
                 viewModelScope.launch {
                     _effect.send(Effect.ShowDetails)
                 }
             }
 
             Event.LoadWeather -> {
-                locationRepository.getLastLocation()
-                    .take(1)
-                    .flatMapLatest { location ->
-                        combine(
-                            openMeteoRepository.getForecast(
-                                lat = location.latitude,
-                                lon = location.longitude
-                            ),
-                            locationRepository.getLocationAddress(
-                                location.latitude,
-                                location.longitude
-                            )
-                        ) { weather, address ->
-                            _state.update {
-                                it.copy(
-                                    location = address?.let {
-                                        it.locality + ", " + it.countryName
-                                    } ?: "Unknown location",
-                                    forecast = weather.forecast,
-                                    currentWeather = weather.currentWeather
-                                )
-                            }
-                        }
-                    }
-                    .onCompletion {
-                        _state.update {
-                            it.copy(loading = false)
-                        }
-                    }
-                    .catch {
-                        handleError(it)
-                    }
-                    .launchIn(viewModelScope)
+                handleLoadWeather()
+            }
+
+            is Event.SearchTermChanged -> {
+                _state.update {
+                    it.copy(searchTerm = event.term)
+                }
             }
         }
+    }
+
+    private fun observeSearchTerm() {
+        _state
+            .map { it.searchTerm }
+            .distinctUntilChanged()
+            .debounce(500.milliseconds)
+            .flatMapLatest {
+                if (it.isBlank()) {
+                    flowOf(emptyList())
+                } else {
+                    openMeteoRepository.searchLocation(it)
+                        .catch { emit(emptyList()) }
+                }
+            }
+            .onEach { searchResults ->
+                _state.update {
+                    it.copy(
+                        searchResults = searchResults
+                    )
+                }
+            }
+            .catch {
+                handleError(it)
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun handleLoadWeather() {
+        locationRepository.getLastLocation()
+            .take(1)
+            .flatMapLatest { location ->
+                combine(
+                    openMeteoRepository.getForecast(
+                        lat = location.latitude,
+                        lon = location.longitude
+                    ),
+                    locationRepository.getLocationAddress(
+                        location.latitude,
+                        location.longitude
+                    )
+                ) { weather, address ->
+                    _state.update {
+                        it.copy(
+                            location = address?.let {
+                                it.locality + ", " + it.countryName
+                            } ?: "Unknown location",
+                            forecast = weather.forecast,
+                            currentWeather = weather.currentWeather
+                        )
+                    }
+                }
+            }
+            .onCompletion {
+                _state.update {
+                    it.copy(loading = false)
+                }
+            }
+            .catch {
+                handleError(it)
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun handleError(error: Throwable) {
@@ -90,7 +134,9 @@ class HomeViewModel @Inject constructor(
     }
 
     data class State(
+        val searchTerm: String = "",
         val location: String = "Not set yet",
+        val searchResults: List<SearchResult> = emptyList(),
         val loading: Boolean = true,
         val forecast: List<SingleDayForecast> = emptyList(),
         val currentWeather: CurrentWeather? = null
@@ -98,7 +144,8 @@ class HomeViewModel @Inject constructor(
 
     sealed interface Event {
         data object LoadWeather : Event
-        data object GoToDetailsClicked : Event
+        data class SearchResultClicked(val searchResult: SearchResult) : Event
+        data class SearchTermChanged(val term: String) : Event
     }
 
     sealed interface Effect {

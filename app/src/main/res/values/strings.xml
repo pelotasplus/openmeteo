@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">OpenMeteo</string>
+
+    <string name="weather_clear_sky">Clear sky</string>
+    <string name="weather_mainly_clear_partly_cloudy_overcast">Mainly clear, partly cloudy, and overcast</string>
+    <string name="weather_fog_depositing_rime_fog">Fog and depositing rime fog</string>
+    <string name="weather_drizzle_light_moderate_dense">Drizzle: Light, moderate, and dense intensity</string>
+    <string name="weather_freezing_drizzle_light_dense">Freezing Drizzle: Light and dense intensity</string>
+    <string name="weather_rain_slight_moderate_heavy">Rain: Slight, moderate and heavy intensity</string>
+    <string name="weather_freezing_rain_light_heavy">Freezing Rain: Light and heavy intensity</string>
+    <string name="weather_snow_fall_slight_moderate_heavy">Snow fall: Slight, moderate, and heavy intensity</string>
+    <string name="weather_snow_grains">Snow grains</string>
+    <string name="weather_rain_showers_slight_moderate_violent">Rain showers: Slight, moderate, and violent</string>
+    <string name="weather_snow_showers_slight_heavy">Snow showers slight and heavy</string>
+    <string name="weather_thunderstorm_slight_moderate">Thunderstorm: Slight or moderate</string>
+    <string name="weather_thunderstorm_hail_slight_heavy">Thunderstorm with slight and heavy hail</string>
 </resources>

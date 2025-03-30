@@ -6,18 +6,27 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import pl.pelotasplus.openmeteo.data.OpenMeteoRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val openMeteoRepository: OpenMeteoRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
 
     private val _effect = Channel<Effect>()
     val effect = _effect.receiveAsFlow()
+
+    init {
+        handleEvent(Event.LoadWeather)
+    }
 
     fun handleEvent(event: Event) {
         when (event) {
@@ -28,9 +37,17 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             }
 
             Event.LoadWeather -> {
-                // todo
+                openMeteoRepository.getForecast()
+                    .catch {
+                        handleError(it)
+                    }
+                    .launchIn(viewModelScope)
             }
         }
+    }
+
+    private fun handleError(error: Throwable) {
+        error.printStackTrace()
     }
 
     data class State(

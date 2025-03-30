@@ -6,13 +6,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import pl.pelotasplus.openmeteo.core.ObserveEffects
 
 @Composable
 fun DetailsScreen(
     modifier: Modifier = Modifier,
-    viewModel: DetailsViewModel = viewModel()
+    viewModel: DetailsViewModel = hiltViewModel()
 ) {
     ObserveEffects(viewModel.effect) { effect ->
         when (effect) {

@@ -14,10 +14,10 @@ class OpenMeteoRepository @Inject constructor(
     private val openMeteoApi: OpenMeteoApi,
     private val json: Json
 ) {
-    private suspend fun getRealForecast(): ForecastResponse {
+    private suspend fun getRealForecast(lat: Double, lon: Double): ForecastResponse {
         return openMeteoApi.forecast(
-            latitude = 38.6447,
-            longitude = 0.0445,
+            latitude = lat,
+            longitude = lon,
             daily = listOf("weather_code", "temperature_2m_max", "temperature_2m_min"),
             current = listOf(
                 "temperature_2m",
@@ -78,9 +78,9 @@ class OpenMeteoRepository @Inject constructor(
         return ret
     }
 
-    fun getForecast(): Flow<Weather> {
+    fun getForecast(lat: Double, lon: Double): Flow<Weather> {
         return flow {
-            val ret = getRealForecast()
+            val ret = getRealForecast(lat, lon)
 //            val ret = getMockedForecast()
 
             val mappedForecasts = (0 until ret.daily.time.size).map {

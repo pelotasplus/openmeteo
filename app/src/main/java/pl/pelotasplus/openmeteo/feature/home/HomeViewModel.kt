@@ -7,12 +7,15 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.pelotasplus.openmeteo.data.LocationRepository
 import pl.pelotasplus.openmeteo.data.OpenMeteoRepository
 import pl.pelotasplus.openmeteo.domain.model.CurrentWeather
 import pl.pelotasplus.openmeteo.domain.model.SingleDayForecast
@@ -20,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val locationRepository: LocationRepository,
     private val openMeteoRepository: OpenMeteoRepository
 ) : ViewModel() {
 
@@ -42,13 +46,28 @@ class HomeViewModel @Inject constructor(
             }
 
             Event.LoadWeather -> {
-                openMeteoRepository.getForecast()
-                    .onEach { weather ->
-                        _state.update {
-                            it.copy(
-                                forecast = weather.forecast,
-                                currentWeather = weather.currentWeather
+                locationRepository.getLastLocation()
+                    .take(1)
+                    .flatMapLatest { location ->
+                        combine(
+                            openMeteoRepository.getForecast(
+                                lat = location.latitude,
+                                lon = location.longitude
+                            ),
+                            locationRepository.getLocationAddress(
+                                location.latitude,
+                                location.longitude
                             )
+                        ) { weather, address ->
+                            _state.update {
+                                it.copy(
+                                    location = address?.let {
+                                        it.locality + ", " + it.countryName
+                                    } ?: "Unknown location",
+                                    forecast = weather.forecast,
+                                    currentWeather = weather.currentWeather
+                                )
+                            }
                         }
                     }
                     .onCompletion {

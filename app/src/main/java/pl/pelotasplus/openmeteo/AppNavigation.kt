@@ -10,8 +10,12 @@ import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 import pl.pelotasplus.openmeteo.feature.details.DetailsScreen
 import pl.pelotasplus.openmeteo.feature.home.HomeScreen
+import pl.pelotasplus.openmeteo.feature.splash.SplashScreen
 
 sealed interface AppNavigationDestinations {
+    @Serializable
+    data object Splash : AppNavigationDestinations
+
     @Serializable
     data object Home : AppNavigationDestinations
 
@@ -27,8 +31,18 @@ fun AppNavigation(
     NavHost(
         modifier = Modifier.Companion.padding(paddingValues),
         navController = navController,
-        startDestination = AppNavigationDestinations.Home
+        startDestination = AppNavigationDestinations.Splash
     ) {
+        composable<AppNavigationDestinations.Splash> {
+            SplashScreen(
+                permissionsGranted = {
+                    navController.navigate(AppNavigationDestinations.Home) {
+                        popUpTo<AppNavigationDestinations.Splash> { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable<AppNavigationDestinations.Home> {
             HomeScreen(
                 goToDetails = {

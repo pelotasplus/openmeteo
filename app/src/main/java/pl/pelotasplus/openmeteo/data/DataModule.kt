@@ -34,7 +34,8 @@ class DataModule {
     @Provides
     @Named(WEATHER_API)
     fun provideWeatherRetrofit(
-        @Named(WEATHER_API) baseUrl: String, json: Json
+        @Named(WEATHER_API) baseUrl: String,
+        json: Json
     ): Retrofit =
         Retrofit.Builder()
             .baseUrl(baseUrl)

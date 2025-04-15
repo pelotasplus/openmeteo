@@ -48,6 +48,9 @@ fun HomeScreen(
         },
         onCurrentWeatherClicked = {
             viewModel.handleEvent(HomeViewModel.Event.CurrentWeatherClicked)
+        },
+        onDeleteRecenSearch = {
+            viewModel.handleEvent(HomeViewModel.Event.DeleteRecentSearch(it))
         }
     )
 }
@@ -58,7 +61,8 @@ private fun HomeContent(
     modifier: Modifier = Modifier,
     onSearchTermChanged: (String) -> Unit = {},
     onSearchResultClicked: (SearchResult) -> Unit = {},
-    onCurrentWeatherClicked: () -> Unit = {}
+    onCurrentWeatherClicked: () -> Unit = {},
+    onDeleteRecenSearch: (String) -> Unit = {},
 ) {
     if (state.loading) {
         HomeLoadingContent(modifier)
@@ -68,7 +72,8 @@ private fun HomeContent(
             modifier,
             onSearchTermChanged,
             onSearchResultClicked,
-            onCurrentWeatherClicked
+            onCurrentWeatherClicked,
+            onDeleteRecenSearch
         )
     }
 }

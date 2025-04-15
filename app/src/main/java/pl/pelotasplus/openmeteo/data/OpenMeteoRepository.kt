@@ -94,8 +94,6 @@ class OpenMeteoRepository @Inject constructor(
                 "wind_speed_10m",
                 "relative_humidity_2m"
             )
-        ).also {
-            print("XXX ret ${it.current.humidity} -> ${it.current.windSpeed}")
-        }
+        )
     }
 }

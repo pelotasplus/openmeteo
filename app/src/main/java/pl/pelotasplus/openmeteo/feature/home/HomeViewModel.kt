@@ -81,6 +81,12 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+
+            is Event.DeleteRecentSearch -> {
+                _state.update {
+                    it.copy(recentSearches = it.recentSearches - event.recentSearch)
+                }
+            }
         }
     }
 
@@ -89,19 +95,23 @@ class HomeViewModel @Inject constructor(
             .map { it.searchTerm }
             .distinctUntilChanged()
             .debounce(500.milliseconds)
-            .flatMapLatest {
-                if (it.isBlank()) {
+            .flatMapLatest { term ->
+                if (term.isBlank()) {
                     flowOf(emptyList())
                 } else {
-                    openMeteoRepository.searchLocation(it)
+                    openMeteoRepository.searchLocation(term)
                         .catch { emit(emptyList()) }
-                }
-            }
-            .onEach { searchResults ->
-                _state.update {
-                    it.copy(
-                        searchResults = searchResults
-                    )
+                }.onEach { searchResults ->
+                    _state.update {
+                        it.copy(
+                            searchResults = searchResults,
+                            recentSearches = if (term.isNotEmpty()) {
+                                it.recentSearches + it.searchTerm
+                            } else {
+                                it.recentSearches
+                            }.distinct().takeLast(5)
+                        )
+                    }
                 }
             }
             .catch {
@@ -124,7 +134,6 @@ class HomeViewModel @Inject constructor(
                         location.longitude
                     )
                 ) { weather, address ->
-                    println("XXX got weather $weather")
                     _state.update {
                         it.copy(
                             location = address?.let {
@@ -159,13 +168,15 @@ class HomeViewModel @Inject constructor(
         val searchResults: List<SearchResult> = emptyList(),
         val loading: Boolean = true,
         val forecast: List<SingleDayForecast> = emptyList(),
-        val currentWeather: CurrentWeather? = null
+        val currentWeather: CurrentWeather? = null,
+        val recentSearches: List<String> = emptyList()
     )
 
     sealed interface Event {
         data object LoadWeather : Event
         data object CurrentWeatherClicked : Event
         data class SearchResultClicked(val searchResult: SearchResult) : Event
+        data class DeleteRecentSearch(val recentSearch: String) : Event
         data class SearchTermChanged(val term: String) : Event
     }
 

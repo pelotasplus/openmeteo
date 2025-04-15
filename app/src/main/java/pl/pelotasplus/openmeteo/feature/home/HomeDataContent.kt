@@ -5,12 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -39,12 +41,37 @@ internal fun HomeDataContent(
     onSearchTermChanged: (String) -> Unit = {},
     onSearchResultClicked: (SearchResult) -> Unit = {},
     onCurrentWeatherClicked: () -> Unit = {},
+    onDeleteRecenSearch: (String) -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            state.recentSearches.forEach {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
+                    Text(
+                        text = "Search term: $it",
+                        modifier = Modifier.padding(horizontal = 16.dp).weight(1f)
+                    )
+
+                    Button(
+                        onClick = {
+                            onDeleteRecenSearch(it)
+                        }
+                    ) {
+                        Text("Delete")
+                    }
+                }
+            }
+        }
+
         HomeDropdownMenuBox(
             state = state,
             onSearchTermChanged = onSearchTermChanged,
@@ -118,6 +145,7 @@ private fun HomeDataContentPreview() {
                     windSpeed = 20.0,
                     humidity = 30.0
                 ),
+                recentSearches = listOf("London", "Paris"),
                 forecast = listOf(
                     SingleDayForecast(
                         date = "2023-03-29",
